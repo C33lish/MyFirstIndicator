@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Trading Indicator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <style>
+    canvas { border: 1.5px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>My Web-Based Trading Indicator</h1>
+  <script>
+    let data = [
+      { time: 9, price: 3.394 },
+      { time: 10, price: 3.388 },
+      { time: 11, price: 3.382 },
+      { time: 12, price: 3.378 },
+      { time: 13, price: 3.384 },
+      { time: 14, price: 3.392 },
+      { time: 15, price: 3.405 }
+    ];
+
+    function setup() {
+      createCanvas(400, 300);
+      background(0); // Black background
+    }
+
+    function draw() {
+      // Draw X-axis (time)
+      stroke(255); // White color
+      line(50, 250, 350, 250);
+      // Draw Y-axis (price)
+      line(50, 50, 50, 250);
+
+      // Draw candlesticks
+      data.forEach((d, i) => {
+        let x = map(d.time, 9, 15, 50, 350);
+        let yBase = map(d.price, 3.37, 3.41, 250, 50);
+        let yHigh = map(Math.max(d.price, data[i + 1] ? data[i + 1].price : d.price), 3.37, 3.41, 250, 50);
+        let yLow = map(Math.min(d.price, data[i + 1] ? data[i + 1].price : d.price), 3.37, 3.41, 250, 50);
+
+        stroke(255, 0, 0); // Red outline
+        let isUp = d.price > (data[i + 1] ? data[i + 1].price : d.price);
+        fill(isUp ? [0, 255, 0] : [255, 0, 0]); // Green for up, Red for down
+        line(x, yHigh, x, yLow);
+        rect(x - 5, yBase, 10, yHigh - yBase);
+      });
+
+      // Draw Fibonacci levels
+      let swingHigh = 3.405;
+      let swingLow = 3.378;
+      let range = swingHigh - swingLow;
+      let levels = [0.382, 0.5, 1.382, 1.5];
+      levels.forEach(level => {
+        let y = map(swingLow + range * level, 3.37, 3.41, 250, 50);
+        stroke(255, 0, 255); // Purple lines
+        line(50, y, 350, y);
+        fill(255); // White text
+        noStroke();
+        text(`${(level * 100).toFixed(0)}%`, 360, y + 5);
+      });
+
+      // Add probability labels
+      fill(255);
+      text("Probability of a Peak 45%", 200, 70);
+      text("Probability of a Bottom 54%", 200, 230);
+      text("Perfect Sell Zone 0.382-0.5", 200, 150);
+      text("Perfect Buy Zone 1.382-1.5", 200, 100);
+    }
+  </script>
+</body>
+</html>
