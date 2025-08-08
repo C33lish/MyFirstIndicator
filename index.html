@@ -4,11 +4,11 @@
   <title>My Trading Indicator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
   <style>
-    canvas { border: 1.5px solid #ccc; }
+    canvas { border: 2px solid #fff; } /* Thicker border for contrast */
   </style>
 </head>
 <body>
-  <h1>My Web-Based Trading Indicator</h1>
+  <h1 style="color: #fff; background: #000; padding: 10px;">My Web-Based Trading Indicator</h1>
   <script>
     let data = [
       { time: 9, price: 3.394 },
@@ -22,54 +22,81 @@
 
     function setup() {
       createCanvas(400, 300);
+      pixelDensity(2); // Double pixel density for sharper rendering
       background(0); // Black background
+      textSize(14); // Increase default font size
+      textFont('sans-serif'); // Use a clear font
     }
 
     function draw() {
-      // Draw X-axis (time)
-      stroke(255); // White color
+      // Clear background each frame to avoid overlap
+      background(0);
+
+      // Draw X-axis (time) with thicker lines
+      stroke(255); // White
+      strokeWeight(2); // Thicker lines
       line(50, 250, 350, 250);
-      // Draw Y-axis (price)
+      for (let t = 9; t <= 15; t++) {
+        let x = map(t, 9, 15, 50, 350);
+        text(t + ":00", x - 15, 265); // Larger text, adjusted position
+      }
+
+      // Draw Y-axis (price) with thicker lines
       line(50, 50, 50, 250);
+      for (let p = 3.37; p <= 3.41; p += 0.01) {
+        let y = map(p, 3.41, 3.37, 50, 250);
+        if (p % 0.02 === 0) text(p.toFixed(2), 30, y + 5); // Larger text
+      }
 
-      // Draw candlesticks
-data.forEach((d, i) => {
-  let x = map(d.time, 9, 15, 50, 350);
-  let yOpen = map(d.price, 3.41, 3.37, 50, 250); // Invert Y-axis (higher price = lower Y)
-  let yClose = map(data[i + 1] ? data[i + 1].price : d.price, 3.41, 3.37, 50, 250);
-  let yHigh = map(Math.max(d.price, data[i + 1] ? data[i + 1].price : d.price), 3.41, 3.37, 50, 250);
-  let yLow = map(Math.min(d.price, data[i + 1] ? data[i + 1].price : d.price), 3.41, 3.37, 50, 250);
+      // Draw candlesticks with thicker outlines
+      strokeWeight(2);
+      data.forEach((d, i) => {
+        let x = map(d.time, 9, 15, 50, 350);
+        let yOpen = map(d.price, 3.41, 3.37, 50, 250);
+        let yClose = map(data[i + 1] ? data[i + 1].price : d.price, 3.41, 3.37, 50, 250);
+        let yHigh = map(Math.max(d.price, data[i + 1] ? data[i + 1].price : d.price), 3.41, 3.37, 50, 250);
+        let yLow = map(Math.min(d.price, data[i + 1] ? data[i + 1].price : d.price), 3.41, 3.37, 50, 250);
 
-  stroke(255, 0, 0); // Red outline
-  let isUp = d.price < (data[i + 1] ? data[i + 1].price : d.price); // Changed to < for uptrend
-  fill(isUp ? [0, 255, 0] : [255, 0, 0]); // Green for up, Red for down
-  line(x, yHigh, x, yLow); // Wick
-  if (yClose !== yOpen) { // Avoid zero-height rectangles
-    rect(x - 5, min(yOpen, yClose), 10, abs(yOpen - yClose)); // Body
-  }
-});
+        stroke(255, 0, 0); // Bright red outline
+        let isUp = d.price < (data[i + 1] ? data[i + 1].price : d.price);
+        fill(isUp ? [0, 200, 0] : [200, 0, 0]); // Brighter green and red
+        line(x, yHigh, x, yLow); // Wick
+        if (yClose !== yOpen) {
+          rect(x - 10, min(yOpen, yClose), 20, abs(yOpen - yClose)); // Wider bars
+        }
+      });
 
-      // Draw Fibonacci levels
-let swingHigh = 3.405;
-let swingLow = 3.378;
-let range = swingHigh - swingLow;
-let levels = [0.382, 0.5, 1.382, 1.5];
-levels.forEach(level => {
-  let y = map(swingLow + range * level, 3.41, 3.37, 50, 250); // Match Y-axis inversion
-  stroke(255, 0, 255); // Purple lines
-  line(50, y, 350, y);
-  fill(255); // White text
-  noStroke();
-  text(`${(level * 100).toFixed(0)}%`, 360, y + 5);
-});
+      // Draw Fibonacci levels with thicker lines
+      strokeWeight(2);
+      stroke(150, 0, 150); // Brighter purple
+      let swingHigh = 3.405;
+      let swingLow = 3.378;
+      let range = swingHigh - swingLow;
+      let levels = [0.382, 0.5, 1.382, 1.5];
+      levels.forEach(level => {
+        let y = map(swingLow + range * level, 3.41, 3.37, 50, 250);
+        line(50, y, 350, y);
+        noStroke();
+        fill(255); // Bright white text
+        text(`${(level * 100).toFixed(0)}%`, 360, y + 5);
+      });
 
-      // Add probability labels
-fill(255);
-text("Probability of a Peak 13%", 200, 70);
-text("Probability of a Bottom 5%", 200, 230);
-text("Perfect Sell Zone 0.382-0.5", 200, 150);
-text("Perfect Buy Zone 1.382-1.5", 200, 100);
-}
+      // Add trend lines with thicker lines
+      strokeWeight(2);
+      stroke(255, 0, 0); // Bright red
+      line(50, map(3.394, 3.41, 3.37, 50, 250), 350, map(3.405, 3.41, 3.37, 50, 250));
+      stroke(255, 255, 0); // Bright yellow
+      line(50, map(3.378, 3.41, 3.37, 50, 250), 350, map(3.392, 3.41, 3.37, 50, 250));
+
+      // Add probability and zone labels with larger text
+      noStroke();
+      fill(255); // Bright white
+      textSize(14);
+      text("Probability of a Peak 13%", 10, 20); // Top left
+      text("Probability of a Bottom 5%", 10, 280); // Bottom left
+      text("Perfect Sell Zone 0.382-0.5", 10, 150); // Middle left
+      text("Perfect Buy Zone 1.382-1.5", 10, 100); // Above sell zone
+      text("Confidence: 27.3% (FAIR)", 10, 160); // For Sell Zone
+      text("Confidence: 100% (EXCELLENT)", 10, 110); // For Buy Zone
+    }
   </script>
-</body>
-</html>
